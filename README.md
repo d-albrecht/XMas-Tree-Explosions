@@ -16,7 +16,7 @@ I don't want to bother with an actual license here, but rather **ask you** to re
 
 5. Don't distribute or use my scala code if you can't add something substantial to it yourself. If you improve the code, see point 3. If you just regenerate the seeds and want to see the results yourself, that is fine. If you run the code on your own seeds in order to submit your animation, there has to be something novel either about your seeds or the result.
 
-6. If you made one of the mentioned tree-illumination simulators and are on the lookout for sample animations you can freely use any samples you find here **that aren't of my latest iteration**! I would ask you to not put the latest iteration out there because that are the ones I might submit. So, currently you can freely use any v1 animations. Clearly, I can't prevent anyone from running any of my latest creations on any simulator, but I don't like the idea of them being one preset sample on any of the simulators.
+6. If you made one of the mentioned tree-illumination simulators and are on the lookout for sample animations you can freely use any samples you find here **that aren't of my latest iteration**! I would really ask you to not put the latest iteration out there because that are the ones I might submit. So, currently you can freely use any v1 animations. Clearly, I can't prevent anyone from running any of my latest creations on any simulator, but I don't like the idea of them being one preset sample on any of the simulators. All animation files in the root-folder are v1 that I left there for legacy reasons in case anyone linked to these files prior to my v2 update.
 
 ## Concept
 
