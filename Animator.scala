@@ -7,10 +7,10 @@ object Animator extends App {
 	}
 
 	// parameters
-	val seedingFrames = 100
-	val seedingInterval = 15
+	val seedingFrames = 150
+	val seedingInterval = 12
 	val expansionFrames = 20
-	val fadingFrames = 150
+	val fadingFrames = 180
 	val expansionRadius = 0.5
 
 	// file input
@@ -28,6 +28,12 @@ object Animator extends App {
 	println("output file prepared")
 
 	// prepend last few seeds to the beginning
+	val times = seeds.map(_(1)).sorted
+	val gaps = times.zip(times.tail :+ (times.head + seedingFrames))
+	val maxGap = gaps.map(g => (g._1, g._2, g._2 - g._1)).maxBy(_._3)
+	val newStart = maxGap._2
+	seeds = seeds.map(s => s.updated(1, (s(1) + seedingFrames - newStart) % seedingFrames))
+	println("shifted start to frame " + newStart)
 	val loopingFrames = seedingFrames - (expansionFrames + fadingFrames) / seedingInterval - 2
 	seeds = seeds ++ seeds.filter(_(1) > loopingFrames).map(s => s.updated(1, s(1) - seedingFrames))
 	println("infinite looping prepared. number of seeds now: " + seeds.size)
@@ -35,12 +41,12 @@ object Animator extends App {
 	// generatin the actual color-table
 	def filterSeeds(frame: Int, d: List[Float])(s: List[Int]): Boolean = {
 		// expansion phase		
-		s(1) * seedingInterval < frame &&
+		s(1) * seedingInterval <= frame &&
 		frame <= s(1) * seedingInterval + expansionFrames &&
 		d(s(0)) <= expansionRadius * (frame - s(1) * seedingInterval) / expansionFrames ||
 		// fading phase
 		s(1) * seedingInterval + expansionFrames <= frame &&
-		frame < s(1) * seedingInterval + expansionFrames + fadingFrames &&
+		frame <= s(1) * seedingInterval + expansionFrames + fadingFrames &&
 		d(s(0)) <= expansionRadius
 	}
 	// this helper function will corrupt both the index and the time frame information, don't rely on them anymore
@@ -48,7 +54,8 @@ object Animator extends App {
 		if (frame <= s(1) * seedingInterval + expansionFrames) {
 			s
 		} else {
-			val dimming = 1.0 * (s(1) * seedingInterval + expansionFrames + fadingFrames - frame) / fadingFrames
+			val flicker = scala.util.Random.nextFloat() * 0.125
+			val dimming = 1.0 * (s(1) * seedingInterval + expansionFrames + fadingFrames - frame) / fadingFrames + flicker
 			s.map(c => (c * dimming).toInt)
 		}
 	}
