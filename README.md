@@ -1,6 +1,6 @@
 # XMas-Tree-Explosions (X-Mas Tree animation - celebrating New Year's Eve)
 
-Current version: v2, see changes in the end of this file
+Current version: v2.5, see changes in the end of this file
 
 ## License (sort of)
 
@@ -17,6 +17,44 @@ I don't want to bother with an actual license here, but rather **ask you** to re
 5. Don't distribute or use my scala code if you can't add something substantial to it yourself. If you improve the code, see point 3. If you just regenerate the seeds and want to see the results yourself, that is fine. If you run the code on your own seeds in order to submit your animation, there has to be something novel either about your seeds or the result.
 
 6. If you made one of the mentioned tree-illumination simulators and are on the lookout for sample animations you can freely use any samples you find here **that aren't of my latest iteration**! I would really ask you to not put the latest iteration out there because that are the ones I might submit. So, currently you can freely use any v1 animations. Clearly, I can't prevent anyone from running any of my latest creations on any simulator, but I don't like the idea of them being one preset sample on any of the simulators. Please give credit by linking to this project such that visitors of your simulator can find my description and the generating code. All animation files in the root-folder are v1 that I left there for legacy reasons in case anyone linked to these files prior to my v2 update.
+
+## Guide
+
+I finally decided to create a guide on how to use this generator as I know the tricks myself but they aren't obvious here and there.
+
+1. Generate the normalized coordinates:
+	1. take coordinates in x,y,z-format and load them into the first sheet of `normalize_coordinates.ods`
+	2. in sheet two, set F1 and G1 to `1`, then set F1 to the **value of** J1 (paste as number)
+	3. then adjust G1 slightly (to something within `[.95, 1]`) to see which points reach out of the cylinder first
+	4. use the ids of these points on sheet three to let the spreadsheet move the center
+	5. if done correctly, applying the same steps as in step 1.ii on sheet four will result in a smaller rescaling factor in F1 and again adjusting G1 will cause opposing points to reach out of the cylinder first.
+	6. set F1 again to `1` and copy the columns F to H into whatevery file you want. don't copy the upper "header columns" and stop at whichever id your initial data set did. the sheet supports up to 1000 entries, Matt's coordinates stop at 500. H1 lists the highest z-value in the normalized data set.
+2. Generate the seeds:
+	1. input the coordinates from step 1.vi into the second sheet of `rand_seed.ods` where it says GIFT. this spreadsheet is modeled for exactly 500 entries and 40 seeds, you might have to adjust this manually
+	2. set the threshold in B2 to whatever radius you like most
+	3. set the seeding frame number in B1 to your number of seeding frames
+	4. on sheet one, let the application recalculate all numbers until they show numbers that you like. my criteria are:
+		1) I1 is below the threshold (configurale on sheet two) and is shown in green (if conditional formatting works), that means that all events happen close enough to SOME LEDs to be visible at all
+		2) H1 ends in (1) or (TRUE), that means that all x-y-coordinate-pairs are inside the cylinder and that the threshold condition is met
+		3) check the "Frame"-diagram to see if there are large temporal gaps in between the events
+		4) check the "Hue"-diagram to see how similar the colors will be, if the points are distributed well across the diagonal, there will be a lot of different colors
+		5) check the untitled diagram to see what colors will be visible at what frames. x is time, y is color/hue
+	5. if you are fine with your seeds, copy column W of sheet one to a file (usually called "seeds.csv") and copy column CJ of sheet two to another file (usually called "dists.csv")
+3. Run the Animator-class:
+	1. most options that you might want to change from one run to the next are configurable from command line. it is usually not necessary to modify the code if you are not trying to change the way the animation works
+	2. the following command line parameters are supported:
+		- `-d=<filename>` specify the **d**istance-matrix file, defaults to "dists.csv"
+		- `-s=<filename>` specify the **s**eeds file, defaults to "seeds.csv"
+		- `-o=<filename>` specify the **o**utput file, defaults to "explosions.csv"
+		- `-l=<number>` specify the number of seeding frames aka the animation-**l**ength, defaults to 150
+		- `-i=<number>` specify the seeding **i**nterval, the number of frames per seeding frame, defaults to 12
+		- `-e=<number>` specify the length in frames of an **e**xpansion phase, defaults to 20
+		- `-f=<number>` specify the length in frames of a **f**ading phase, defaults to 180
+		- `-r=<number>` specify the **r**adius of an explosion in tenth (e.g. 5 means 0.5), defaults to 0.5
+		- `-b` disables the pattern collision avoidance (aka enables the **b**irthday paradox on patterns), defaults to on
+		- `-c` disables the flickering (causes a **c**onstant fading), defaults to on
+	3. the scala code will simply error out on any false useage, I haven't bothered with making it fool-proof
+	4. you can combine distance-matrices and seeds that you haven't generated in the same run, this will keep the timings and color sequence of the seeds file but adapt the spacial information of the dists table
 
 ## Concept
 
@@ -80,3 +118,13 @@ I decided to have one explosion every 1.5 seconds (on average), hence, increasin
 Based on an issue/feature with one of the [simulators](https://github.com/leukipp/xmastree2021) that appeared to let the LEDs flicker instead of shining with a constant brightness - what might be intentional or a bug in the update routine, but I can't tell for sure - I decided to integrate this effect on purpose. Every fading explosion will flicker slightly. (Credit goes to [@leukipp](https://github.com/leukipp).) But only one eighth of the maximum brightness to prevent (most) health issues. But neither am I a doctor nor do I suffer any form of epilepsy, so I can't really quarantee that this animation is perfectly safe. If in doubt, rather watch the v1 animations on any non-flickering simulator.
 
 And I added other forms of quality measures to my spreadsheet. But with the new simulators I discovered that these numerical quality measures can only tell you so much. Sure, I could add even more diagrams to the spreadsheet that show me the spacial and temporal effects even better (or in combination), but at the end this is all personal preference. And I rather watch the animation in a simulator than checking my numbers for critical thresholds that in the end let the animation appear to predictable.
+
+## Update v2.5
+
+Several small (but some important) changes this time.
+
+First, I finally conform with the format in the Harvard-repo by choosing upper case column headers. The pull request isn't through yet, but we will have an officlal format definition soon that would make my headers break the runner code. To act pre-emptively here and to no longer be the odd one out, I adjusted my format.
+
+Second, I introduced some logic that will make perfectly simulaneous patterns impossible (by user choice) if there aren't too many effects in the intermediate representation. This code segment will never activate on dense effects as these would be made far too rhythmical. For my choice of parameters, preventing perfectly simultaneous events usually only introduces slight adjustments to very few events keeping the overall pattern more or less unchanged.
+
+Lastly, I modified the scala code such that most options can be set from command line. See Guide for instructions.
